@@ -1,6 +1,7 @@
 # 📡 openwrt-adblock-hosts – Hosts Lists for OpenWrt Adblock
 
-![Full Combined Domains](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/full_combined.json)
+![Full Combined Domains](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/full_combined.json?cacheSeconds=60)
+
 
 Repozytorium zawiera **automatycznie aktualizowane listy domen w formacie `<DOMAIN>`**, zoptymalizowane pod **OpenWrt Adblock 24.10+**.
 

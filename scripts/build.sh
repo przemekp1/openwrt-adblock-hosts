@@ -1,6 +1,15 @@
 #!/bin/sh
 set -e
 
+ROOT="$(pwd)"
+TMP="$ROOT/tmp"
+DOMAINS="$ROOT/domains"
+BADGE_DIR="$ROOT/.badges"
+MAX=370000
+
+mkdir -p "$TMP" "$DOMAINS" "$BADGE_DIR"
+rm -f "$TMP"/*
+
 fetch() {
   NAME="$1"
   URL="$2"
@@ -17,102 +26,103 @@ fetch() {
   rm -f "$OUT.tmp"
 }
 
-ROOT="$(pwd)"
-TMP="$ROOT/tmp"
-DOMAINS="$ROOT/domains"
-MAX=370000
+echo "[+] Downloading lists"
 
-mkdir -p "$TMP" "$DOMAINS"
-rm -f "$TMP"/*
+fetch "CERT.PL" \
+  "https://hole.cert.pl/domains/v2/domains.txt" \
+  "$TMP/certpl.txt"
 
-echo "[+] Fetching CERT.PL"
-curl -fsSL https://hole.cert.pl/domains/v2/domains.txt \
-| "$ROOT/scripts/normalize.sh" \
-> "$TMP/certpl.txt"
+fetch "AdAway" \
+  "https://adaway.org/hosts.txt" \
+  "$TMP/adaway.txt"
 
-echo "[+] Fetching URLhaus (malware domains)"
-curl -fsSL https://urlhaus.abuse.ch/downloads/csv_recent/ \
-| awk -F',' 'NR>1 {print $3}' \
-| sed 's/"//g' \
-| sed 's|https\?://||' \
-| sed 's|/.*||' \
-| "$ROOT/scripts/normalize.sh" \
-> "$TMP/urlhaus.txt"
+fetch "StevenBlack" \
+  "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts" \
+  "$TMP/stevenblack.txt"
 
-echo "[+] Fetching AdAway"
-curl -fsSL https://adaway.org/hosts.txt \
-| "$ROOT/scripts/normalize.sh" \
-> "$TMP/adaway.txt"
+fetch "yoyo.org" \
+  "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext" \
+  "$TMP/yoyo.txt"
 
-echo "[+] Fetching StevenBlack"
-curl -fsSL https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts \
-| "$ROOT/scripts/normalize.sh" \
-> "$TMP/stevenblack.txt"
+fetch "Disconnect tracking" \
+  "https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt" \
+  "$TMP/disconnect_tracking.txt"
 
-echo "[+] Fetching yoyo.org"
-curl -fsSL "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext" \
-| "$ROOT/scripts/normalize.sh" \
-> "$TMP/yoyo.txt"
+fetch "Disconnect malvertising" \
+  "https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt" \
+  "$TMP/disconnect_malvertising.txt"
 
-echo "[+] Fetching Disconnect tracking"
-curl -fsSL https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt \
-| "$ROOT/scripts/normalize.sh" \
-> "$TMP/disconnect_tracking.txt"
-
-echo "[+] Fetching Disconnect malvertising"
-curl -fsSL https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt \
-| "$ROOT/scripts/normalize.sh" \
-> "$TMP/disconnect_malvertising.txt"
-
-echo "[+] Building category lists"
-cat "$TMP/certpl.txt" | sort -u > "$DOMAINS/certpl.txt"
-cat "$TMP/adaway.txt" "$TMP/yoyo.txt" | sort -u > "$DOMAINS/ads.txt"
-cat "$TMP/disconnect_tracking.txt" | sort -u > "$DOMAINS/tracking.txt"
-cat "$TMP/stevenblack.txt" "$TMP/disconnect_malvertising.txt" "$TMP/urlhaus.txt" | sort -u > "$DOMAINS/malware.txt"
-
-echo "[+] Building profile lists"
-
-# Basic list - kluczowe kategorie
-cat "$TMP/certpl.txt" "$TMP/adaway.txt" "$TMP/yoyo.txt" "$TMP/disconnect_tracking.txt" \
-| sort -u > "$DOMAINS/basic.txt"
-
-# Full list - większa lista bezpieczeństwa i trackery
-cat "$DOMAINS/basic.txt" "$TMP/stevenblack.txt" "$TMP/disconnect_malvertising.txt" "$TMP/urlhaus.txt" \
-| sort -u > "$DOMAINS/full.txt"
-
-# Combined list
-cat "$DOMAINS/full.txt" | sort -u > "$DOMAINS/combined.txt"
-
-# Hard limit check
-COUNT=$(wc -l < "$DOMAINS/combined.txt")
-if [ "$COUNT" -gt "$MAX" ]; then
-  echo "[!] ERROR: combined.txt too large: $COUNT domains (limit $MAX)"
-  exit 1
+echo "[+] Fetching URLhaus"
+if ! curl -fsSL https://urlhaus.abuse.ch/downloads/csv_recent/ > "$TMP/urlhaus.csv"; then
+  echo "[!] WARNING: failed to fetch URLhaus"
+  : > "$TMP/urlhaus.txt"
+else
+  awk -F',' 'NR>1 {print $3}' "$TMP/urlhaus.csv" \
+  | sed 's/"//g' \
+  | sed 's|https\?://||' \
+  | sed 's|/.*||' \
+  | sed 's/:.*//' \
+  | "$ROOT/scripts/normalize.sh" \
+  > "$TMP/urlhaus.txt"
 fi
 
-echo "[+] Stats:"
+echo "[+] Building category lists"
+
+sort -u "$TMP/certpl.txt" > "$DOMAINS/certpl.txt"
+sort -u "$TMP/adaway.txt" "$TMP/yoyo.txt" > "$DOMAINS/ads.txt"
+sort -u "$TMP/disconnect_tracking.txt" > "$DOMAINS/tracking.txt"
+sort -u "$TMP/stevenblack.txt" "$TMP/disconnect_malvertising.txt" "$TMP/urlhaus.txt" > "$DOMAINS/malware.txt"
+
+echo "[+] Building profiles"
+
+sort -u \
+  "$TMP/certpl.txt" \
+  "$TMP/adaway.txt" \
+  "$TMP/yoyo.txt" \
+  "$TMP/disconnect_tracking.txt" \
+  > "$DOMAINS/basic.txt"
+
+sort -u \
+  "$DOMAINS/basic.txt" \
+  "$TMP/stevenblack.txt" \
+  "$TMP/disconnect_malvertising.txt" \
+  "$TMP/urlhaus.txt" \
+  > "$DOMAINS/full.txt"
+
+sort -u "$DOMAINS/full.txt" > "$DOMAINS/combined.txt"
+
+COUNT=$(wc -l < "$DOMAINS/combined.txt")
+[ "$COUNT" -gt "$MAX" ] && {
+  echo "[!] ERROR: combined.txt too large ($COUNT > $MAX)"
+  exit 1
+}
+
+echo "[+] Stats"
 wc -l "$DOMAINS/"*.txt
 
-# Update badges
-BADGE_DIR="$ROOT/.badges"
-mkdir -p "$BADGE_DIR"
+make_badge () {
+  FILE="$1"
+  LABEL="$2"
+  COLOR="$3"
+  NAME="$4"
 
-COMBINED_COUNT=$(wc -l < "$DOMAINS/combined.txt" | tr -d ' ')
-cat > "$BADGE_DIR/domains.json" <<EOF
+  COUNT=$(wc -l < "$FILE" | tr -d ' ')
+
+  cat > "$BADGE_DIR/$NAME.json" <<EOF
 {
   "schemaVersion": 1,
-  "label": "domains",
-  "message": "$COMBINED_COUNT",
-  "color": "blue"
+  "label": "$LABEL",
+  "message": "$COUNT",
+  "color": "$COLOR"
 }
 EOF
+}
 
-FULL_COUNT=$(wc -l < "$DOMAINS/full.txt" | tr -d ' ')
-cat > "$BADGE_DIR/full_domains.json" <<EOF
-{
-  "schemaVersion": 1,
-  "label": "full domains",
-  "message": "$FULL_COUNT",
-  "color": "green"
-}
-EOF
+echo "[+] Updating badges"
+
+make_badge "$DOMAINS/ads.txt"        "ads"        "orange" "ads_domains"
+make_badge "$DOMAINS/tracking.txt"   "tracking"   "yellow" "tracking_domains"
+make_badge "$DOMAINS/malware.txt"    "malware"    "red"    "malware_domains"
+make_badge "$DOMAINS/certpl.txt"     "cert.pl"    "blue"   "certpl_domains"
+make_badge "$DOMAINS/basic.txt"      "basic"      "green"  "basic_domains"
+make_badge "$DOMAINS/full.txt"       "full"       "green_

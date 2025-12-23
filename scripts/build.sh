@@ -49,23 +49,23 @@ curl -fsSL https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt 
 > "$TMP/disconnect_malvertising.txt"
 
 echo "[+] Building category lists"
+cat "$TMP/certpl.txt" | sort -u > "$DOMAINS/certpl.txt"
+cat "$TMP/adaway.txt" "$TMP/yoyo.txt" | sort -u > "$DOMAINS/ads.txt"
+cat "$TMP/disconnect_tracking.txt" | sort -u > "$DOMAINS/tracking.txt"
+cat "$TMP/stevenblack.txt" "$TMP/disconnect_malvertising.txt" "$TMP/urlhaus.txt" | sort -u > "$DOMAINS/malware.txt"
 
-cat "$TMP/certpl.txt" \
-| sort -u > "$DOMAINS/certpl.txt"
+echo "[+] Building profile lists"
 
-cat "$TMP/adaway.txt" "$TMP/yoyo.txt" \
-| sort -u > "$DOMAINS/ads.txt"
+# Basic list - kluczowe kategorie
+cat "$TMP/certpl.txt" "$TMP/adaway.txt" "$TMP/yoyo.txt" "$TMP/disconnect_tracking.txt" \
+| sort -u > "$DOMAINS/basic.txt"
 
-cat "$TMP/disconnect_tracking.txt" \
-| sort -u > "$DOMAINS/tracking.txt"
+# Full list - większa lista bezpieczeństwa i trackery
+cat "$DOMAINS/basic.txt" "$TMP/stevenblack.txt" "$TMP/disconnect_malvertising.txt" "$TMP/urlhaus.txt" \
+| sort -u > "$DOMAINS/full.txt"
 
-cat "$TMP/stevenblack.txt" "$TMP/disconnect_malvertising.txt" "$TMP/urlhaus.txt" \
-| sort -u > "$DOMAINS/malware.txt"
-
-echo "[+] Building combined list"
-
-cat "$DOMAINS/"*.txt \
-| sort -u > "$DOMAINS/combined.txt"
+# Combined list
+cat "$DOMAINS/full.txt" | sort -u > "$DOMAINS/combined.txt"
 
 # Hard limit check
 COUNT=$(wc -l < "$DOMAINS/combined.txt")
@@ -76,3 +76,27 @@ fi
 
 echo "[+] Stats:"
 wc -l "$DOMAINS/"*.txt
+
+# Update badges
+BADGE_DIR="$ROOT/.badges"
+mkdir -p "$BADGE_DIR"
+
+COMBINED_COUNT=$(wc -l < "$DOMAINS/combined.txt" | tr -d ' ')
+cat > "$BADGE_DIR/domains.json" <<EOF
+{
+  "schemaVersion": 1,
+  "label": "domains",
+  "message": "$COMBINED_COUNT",
+  "color": "blue"
+}
+EOF
+
+FULL_COUNT=$(wc -l < "$DOMAINS/full.txt" | tr -d ' ')
+cat > "$BADGE_DIR/full_domains.json" <<EOF
+{
+  "schemaVersion": 1,
+  "label": "full domains",
+  "message": "$FULL_COUNT",
+  "color": "green"
+}
+EOF

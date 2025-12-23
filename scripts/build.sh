@@ -13,6 +13,15 @@ curl -sSL https://hole.cert.pl/domains/v2/domains.txt \
 | "$ROOT/scripts/normalize.sh" \
 > "$TMP/certpl.txt"
 
+echo "[+] Fetching URLhaus (malware domains)"
+curl -sSL https://urlhaus.abuse.ch/downloads/csv_recent/ \
+| awk -F',' 'NR>1 {print $3}' \
+| sed 's/"//g' \
+| sed 's|https\?://||' \
+| sed 's|/.*||' \
+| "$ROOT/scripts/normalize.sh" \
+> "$TMP/urlhaus.txt"
+
 echo "[+] Fetching AdAway"
 curl -sSL https://adaway.org/hosts.txt \
 | "$ROOT/scripts/normalize.sh" \

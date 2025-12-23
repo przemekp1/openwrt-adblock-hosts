@@ -4,17 +4,18 @@ set -e
 ROOT="$(pwd)"
 TMP="$ROOT/tmp"
 DOMAINS="$ROOT/domains"
+MAX=370000
 
 mkdir -p "$TMP" "$DOMAINS"
 rm -f "$TMP"/*
 
 echo "[+] Fetching CERT.PL"
-curl -sSL https://hole.cert.pl/domains/v2/domains.txt \
+curl -fsSL https://hole.cert.pl/domains/v2/domains.txt \
 | "$ROOT/scripts/normalize.sh" \
 > "$TMP/certpl.txt"
 
 echo "[+] Fetching URLhaus (malware domains)"
-curl -sSL https://urlhaus.abuse.ch/downloads/csv_recent/ \
+curl -fsSL https://urlhaus.abuse.ch/downloads/csv_recent/ \
 | awk -F',' 'NR>1 {print $3}' \
 | sed 's/"//g' \
 | sed 's|https\?://||' \
@@ -23,27 +24,27 @@ curl -sSL https://urlhaus.abuse.ch/downloads/csv_recent/ \
 > "$TMP/urlhaus.txt"
 
 echo "[+] Fetching AdAway"
-curl -sSL https://adaway.org/hosts.txt \
+curl -fsSL https://adaway.org/hosts.txt \
 | "$ROOT/scripts/normalize.sh" \
 > "$TMP/adaway.txt"
 
 echo "[+] Fetching StevenBlack"
-curl -sSL https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts \
+curl -fsSL https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts \
 | "$ROOT/scripts/normalize.sh" \
 > "$TMP/stevenblack.txt"
 
 echo "[+] Fetching yoyo.org"
-curl -sSL "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext" \
+curl -fsSL "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext" \
 | "$ROOT/scripts/normalize.sh" \
 > "$TMP/yoyo.txt"
 
 echo "[+] Fetching Disconnect tracking"
-curl -sSL https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt \
+curl -fsSL https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt \
 | "$ROOT/scripts/normalize.sh" \
 > "$TMP/disconnect_tracking.txt"
 
 echo "[+] Fetching Disconnect malvertising"
-curl -sSL https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt \
+curl -fsSL https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt \
 | "$ROOT/scripts/normalize.sh" \
 > "$TMP/disconnect_malvertising.txt"
 
@@ -58,7 +59,7 @@ cat "$TMP/adaway.txt" "$TMP/yoyo.txt" \
 cat "$TMP/disconnect_tracking.txt" \
 | sort -u > "$DOMAINS/tracking.txt"
 
-cat "$TMP/stevenblack.txt" "$TMP/disconnect_malvertising.txt" \
+cat "$TMP/stevenblack.txt" "$TMP/disconnect_malvertising.txt" "$TMP/urlhaus.txt" \
 | sort -u > "$DOMAINS/malware.txt"
 
 echo "[+] Building combined list"
@@ -66,6 +67,12 @@ echo "[+] Building combined list"
 cat "$DOMAINS/"*.txt \
 | sort -u > "$DOMAINS/combined.txt"
 
+# Hard limit check
+COUNT=$(wc -l < "$DOMAINS/combined.txt")
+if [ "$COUNT" -gt "$MAX" ]; then
+  echo "[!] ERROR: combined.txt too large: $COUNT domains (limit $MAX)"
+  exit 1
+fi
+
 echo "[+] Stats:"
 wc -l "$DOMAINS/"*.txt
-

@@ -7,8 +7,6 @@
 
 Repozytorium zawiera **automatycznie aktualizowane listy domen w formacie `<DOMAIN>`**, zoptymalizowane pod **OpenWrt Adblock 24.10+**.
 
-Listy powstają na podstawie renomowanych źródeł, łączonych i normalizowanych w **GitHub Actions**, tak aby spełniały limit ~350 tys. domen.
-
 ---
 
 ## 🔗 Powiązane projekty
@@ -28,11 +26,11 @@ Listy powstają na podstawie renomowanych źródeł, łączonych i normalizowany
 
 Tworzone są trzy profile list:
 
-| Plik               | Zawartość / źródła                                         | Przybliżona liczba domen |
-| ------------------ | ---------------------------------------------------------- | ----------------------- |
-| **basic.txt**      | CERT.pl, AdAway, yoyo.org, Disconnect tracking            | ~100–120 tys.           |
-| **full.txt**       | basic.txt + StevenBlack, Disconnect malvertising, URLhaus | ~250–300 tys.           |
-| **combined.txt**   | pełna lista wszystkich kategorii                          | ~330–350 tys.           |
+| Plik               | Zawartość / źródła                                         | Przybliżona liczba domen | RAW URL |
+| ------------------ | ---------------------------------------------------------- | ----------------------- | -------- |
+| **basic.txt**      | CERT.pl, AdAway, yoyo.org, Disconnect tracking            | ~100–120 tys.           | [Pobierz](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/basic.txt) |
+| **full.txt**       | basic.txt + StevenBlack, Disconnect malvertising, URLhaus | ~250–300 tys.           | [Pobierz](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/full.txt) |
+| **combined.txt**   | pełna lista wszystkich kategorii                          | ~330–350 tys.           | [Pobierz](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/combined.txt) |
 
 **Kategorie:**
 
@@ -64,14 +62,17 @@ Workflow GitHub Actions:
 
 ## 📥 Jak używać w OpenWrt Adblock
 
-1. Skopiuj URL do wybranej listy, np.:
-https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/combined.txt
-https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/full.txt
-https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/basic.txt
+1. Skopiuj URL do wybranej listy:
 
-3. W OpenWrt w konfiguracji Adblock dodaj URL jako **feed** w formacie `<DOMAIN>`  
-4. Zrestartuj usługę Adblock lub wymuś aktualizację listy  
-5. Blokowanie działa od razu
+| Profil | RAW URL |
+| ------ | -------- |
+| **Basic** | [https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/basic.txt](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/basic.txt) |
+| **Full** | [https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/full.txt](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/full.txt) |
+| **Combined** | [https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/combined.txt](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/combined.txt) |
+
+2. W OpenWrt w konfiguracji Adblock dodaj URL jako **feed** w formacie `<DOMAIN>`  
+3. Zrestartuj usługę Adblock lub wymuś aktualizację listy  
+4. Blokowanie działa od razu ✅
 
 ---
 

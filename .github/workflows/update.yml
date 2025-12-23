@@ -2,8 +2,11 @@ name: Update domain blocklists
 
 on:
   schedule:
-    - cron: "0 3 * * *"   # codziennie o 03:00 UTC
+    - cron: "0 3 */3 * *"   # co 3 dni
   workflow_dispatch:
+
+permissions:
+  contents: write   # konieczne, żeby workflow mógł pushować zmiany
 
 jobs:
   update:
@@ -18,10 +21,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y curl
 
-      - name: Build lists
-        run: |
-          chmod +x scripts/*.sh
-          ./scripts/build.sh
+      - name: Make scripts executable
+        run: chmod +x scripts/*.sh
+
+      - name: Build domain lists
+        run: ./scripts/build.sh
 
       - name: Commit & push changes
         run: |
@@ -34,4 +38,3 @@ jobs:
             git push
           else
             echo "No changes to commit"
-          fi

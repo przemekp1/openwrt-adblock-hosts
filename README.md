@@ -45,7 +45,7 @@ Lista `combined.txt` powstaje z poniższych źródeł, po deduplikacji i normali
 
 Workflow GitHub Actions:
 
-* ⏰ działa codziennie o 03:00 UTC (cron) oraz ręcznie (`workflow_dispatch`)  
+* ⏰ działa co 3 dni oraz ręcznie (`workflow_dispatch`)  
 * pobiera listy źródłowe  
 * normalizuje domeny w jednolity format  
 * łączy i deduplikuje listy  

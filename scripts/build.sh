@@ -121,7 +121,7 @@ EOF
 echo "[+] Updating badges"
 
 make_badge "$DOMAINS/ads.txt"        "ads"        "orange" "ads_domains"
-make_badge "$DOMAINS/tracking.txt"   "tracking"   "yellow" "tracking_domains"
+make_badge "$DOMAINS/tracking.txt"   "tracking"   "yellow"  "tracking_domains"
 make_badge "$DOMAINS/malware.txt"    "malware"    "red"    "malware_domains"
 make_badge "$DOMAINS/certpl.txt"     "cert.pl"    "blue"   "certpl_domains"
 make_badge "$DOMAINS/basic.txt"      "basic"      "green"  "basic_domains"

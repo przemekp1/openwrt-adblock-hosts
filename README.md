@@ -2,86 +2,100 @@
 
 ![Build](https://github.com/przemekp1/openwrt-adblock-hosts/actions/workflows/update.yml/badge.svg)
 ![Last Commit](https://img.shields.io/github/last-commit/przemekp1/openwrt-adblock-hosts/main)
+
 ![Domains](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/domains.json)
-![Full Domains](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/full_domains.json)
+![Full](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/full_domains.json)
+![Basic](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/basic_domains.json)
+
+![Ads](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/ads_domains.json)
+![Tracking](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/tracking_domains.json)
+![Malware](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/malware_domains.json)
+![CERT.PL](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/certpl_domains.json)
 
 Repozytorium zawiera **automatycznie aktualizowane listy domen w formacie `<DOMAIN>`**, zoptymalizowane pod **OpenWrt Adblock 24.10+**.
 
----
-
-## 🔗 Powiązane projekty
-
-* 🌐 **OpenWrt Adblock**  
-  [https://openwrt.org/docs/guide-user/network/dns/adblock](https://openwrt.org/docs/guide-user/network/dns/adblock)
-
-* 🌐 **URLhaus (malware domains)**  
-  [https://urlhaus.abuse.ch/](https://urlhaus.abuse.ch/)
-
-* 🌐 **CERT Polska - hole.cert.pl**  
-  [https://hole.cert.pl/](https://hole.cert.pl/)
+Listy są **agregowane, normalizowane, deduplikowane i walidowane** przez GitHub Actions.
 
 ---
 
-## 📦 Zawartość list domen
+## 🔗 Powiązane projekty / źródła
 
-Tworzone są trzy profile list:
+* 🌐 OpenWrt Adblock  
+  https://openwrt.org/docs/guide-user/network/dns/adblock
 
-| Plik               | Zawartość / źródła                                         | Przybliżona liczba domen | RAW URL |
-| ------------------ | ---------------------------------------------------------- | ----------------------- | -------- |
-| **basic.txt**      | CERT.pl, AdAway, yoyo.org, Disconnect tracking            | ~100–120 tys.           | [Pobierz](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/basic.txt) |
-| **full.txt**       | basic.txt + StevenBlack, Disconnect malvertising, URLhaus | ~250–300 tys.           | [Pobierz](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/full.txt) |
-| **combined.txt**   | pełna lista wszystkich kategorii                          | ~330–350 tys.           | [Pobierz](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/combined.txt) |
+* 🌐 CERT Polska – hole.cert.pl  
+  https://hole.cert.pl/
 
-**Kategorie:**
+* 🌐 URLhaus (malware & C2)  
+  https://urlhaus.abuse.ch/
 
-| Kategoria   | Źródła                                        | Opis                              |
-| ----------- | --------------------------------------------- | --------------------------------- |
-| `ads`       | AdAway, yoyo.org                              | reklamy, serwery reklamowe        |
-| `tracking`  | Disconnect tracking                            | trackery i profilowanie           |
-| `malware`   | StevenBlack, Disconnect malvertising, URLhaus | malware, phishing, C2             |
-| `certpl`    | CERT.pl                                        | złośliwe i niebezpieczne domeny  |
+* 🌐 StevenBlack Hosts  
+  https://github.com/StevenBlack/hosts
 
-**Format:** jedna domena na linię, czysta, zgodna z OpenWrt Adblock.
+* 🌐 AdAway / yoyo.org / Disconnect.me
+
+---
+
+## 📦 Profile list domen
+
+| Profil | Zawartość | RAW URL |
+|------|----------|--------|
+| **basic.txt** | CERT.PL, reklamy, tracking | https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/basic.txt |
+| **full.txt** | basic + malware + malvertising | https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/full.txt |
+| **combined.txt** | komplet wszystkich kategorii | https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/combined.txt |
+
+Aktualna liczba domen jest widoczna **na badge** (liczona automatycznie).
+
+---
+
+## 🧩 Kategorie domen
+
+| Kategoria | Plik | Opis |
+|---------|------|------|
+| **ads** | `ads.txt` | serwery reklamowe |
+| **tracking** | `tracking.txt` | trackery i profilowanie |
+| **malware** | `malware.txt` | malware, phishing, C2 |
+| **certpl** | `certpl.txt` | domeny zgłoszone przez CERT Polska |
+
+Każda kategoria posiada **osobny badge** pokazujący rzeczywistą liczbę domen.
 
 ---
 
 ## 🔄 Automatyzacja (GitHub Actions)
 
-Workflow GitHub Actions:
+Workflow `update.yml`:
 
-* ⏰ działa codziennie o 03:00 UTC (cron) oraz ręcznie (`workflow_dispatch`)  
-* pobiera listy źródłowe  
-* normalizuje domeny w jednolity format  
-* tworzy profile `basic.txt`, `full.txt`, `combined.txt`  
-* deduplikuje domeny  
-* sprawdza limit (~370k domen)  
-* commit i push do repozytorium — gotowe do użycia w OpenWrt  
-* generuje badge `.badges/domains.json` i `.badges/full_domains.json`
+* ⏰ uruchamiany codziennie o **03:00 UTC** oraz ręcznie
+* pobiera wiele źródeł (z fallbackiem – build nie pada)
+* normalizuje domeny do formatu `<DOMAIN>`
+* deduplikuje wpisy
+* buduje profile `basic`, `full`, `combined`
+* sprawdza limit (~370k domen)
+* commit i push do repozytorium
+* generuje badge `.badges/*.json`
+
+Jeśli któreś źródło jest chwilowo niedostępne:
+* lista zostaje pusta
+* badge pokaże `0`
+* workflow **nie failuje**
 
 ---
 
 ## 📥 Jak używać w OpenWrt Adblock
 
-1. Skopiuj URL do wybranej listy:
-
-| Profil | RAW URL |
-| ------ | -------- |
-| **Basic** | [https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/basic.txt](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/basic.txt) |
-| **Full** | [https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/full.txt](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/full.txt) |
-| **Combined** | [https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/combined.txt](https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/combined.txt) |
-
-2. W OpenWrt w konfiguracji Adblock dodaj URL jako **feed** w formacie `<DOMAIN>`  
-3. Zrestartuj usługę Adblock lub wymuś aktualizację listy  
+1. Skopiuj RAW URL wybranego profilu
+2. Dodaj go jako **feed typu `<DOMAIN>`** w konfiguracji Adblock
+3. Zrestartuj usługę Adblock lub wykonaj aktualizację list
 4. Blokowanie działa od razu ✅
 
 ---
 
 ## ⚠️ Uwagi
 
-* Listy są agregatem z różnych źródeł — mogą wystąpić fałszywe alarmy  
-* Projekt ma charakter **informacyjny i ochronny** — nie gwarantuje 100% ochrony  
-* Jeśli zauważysz problematyczne domeny lub błędy — zgłoś issue w repozytorium
+* Listy są agregatem z wielu źródeł — mogą wystąpić fałszywe alarmy
+* Projekt ma charakter **ochronny**, nie gwarantuje 100% bezpieczeństwa
+* Problemy lub błędne domeny zgłaszaj w **Issues**
 
 ---
 
-⭐ Jeśli repozytorium jest dla Ciebie pomocne, zostaw **gwiazdkę** — to wspiera rozwój projektu!
+⭐ Jeśli repozytorium jest pomocne — zostaw **gwiazdkę**

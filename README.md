@@ -3,8 +3,9 @@
 ![Build](https://github.com/przemekp1/openwrt-adblock-hosts/actions/workflows/update.yml/badge.svg)
 ![Last Commit](https://img.shields.io/github/last-commit/przemekp1/openwrt-adblock-hosts/main)
 ![Domains](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/domains.json)
+![Full Domains](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/.badges/full_domains.json)
 
-Repozytorium zawiera **automatycznie aktualizowane listy domen w czystym formacie `<DOMAIN>`**, zoptymalizowane pod **OpenWrt Adblock 24.10+**.
+Repozytorium zawiera **automatycznie aktualizowane listy domen w formacie `<DOMAIN>`**, zoptymalizowane pod **OpenWrt Adblock 24.10+**.
 
 Listy powstają na podstawie renomowanych źródeł, łączonych i normalizowanych w **GitHub Actions**, tak aby spełniały limit ~350 tys. domen.
 
@@ -25,19 +26,24 @@ Listy powstają na podstawie renomowanych źródeł, łączonych i normalizowany
 
 ## 📦 Zawartość list domen
 
-Lista `combined.txt` powstaje z poniższych źródeł, po deduplikacji i normalizacji:
+Tworzone są trzy profile list:
 
-| Źródło                    | Opis                                | Przybliżona liczba domen  |
-| ------------------------- | ---------------------------------- | ------------------------ |
-| **CERT.pl (hole.cert.pl)** | domeny zagrożeń, phishing, malware | ~30-40 tys.              |
-| **URLhaus**                | domeny malware i C2                 | ~10-15 tys.              |
-| **AdAway**                 | reklamy i trackery                  | ~50-60 tys.              |
-| **StevenBlack hosts**      | reklamy, malware, trackery          | ~150-170 tys.            |
-| **yoyo.org (adservers)**   | serwery reklamowe                   | ~20-25 tys.              |
-| **Disconnect.me**          | tracking i malvertising             | ~15-20 tys.              |
+| Plik               | Zawartość / źródła                                         | Przybliżona liczba domen |
+| ------------------ | ---------------------------------------------------------- | ----------------------- |
+| **basic.txt**      | CERT.pl, AdAway, yoyo.org, Disconnect tracking            | ~100–120 tys.           |
+| **full.txt**       | basic.txt + StevenBlack, Disconnect malvertising, URLhaus | ~250–300 tys.           |
+| **combined.txt**   | pełna lista wszystkich kategorii                          | ~330–350 tys.           |
 
-➡️ **Po deduplikacji lista ma około ~330–350 tys. unikalnych domen**  
-➡️ **Format listy:** czysta domena, jedna domena na linię, zgodna z formatem OpenWrt Adblock `<DOMAIN>`
+**Kategorie:**
+
+| Kategoria   | Źródła                                        | Opis                              |
+| ----------- | --------------------------------------------- | --------------------------------- |
+| `ads`       | AdAway, yoyo.org                              | reklamy, serwery reklamowe        |
+| `tracking`  | Disconnect tracking                            | trackery i profilowanie           |
+| `malware`   | StevenBlack, Disconnect malvertising, URLhaus | malware, phishing, C2             |
+| `certpl`    | CERT.pl                                        | złośliwe i niebezpieczne domeny  |
+
+**Format:** jedna domena na linię, czysta, zgodna z OpenWrt Adblock.
 
 ---
 
@@ -45,12 +51,14 @@ Lista `combined.txt` powstaje z poniższych źródeł, po deduplikacji i normali
 
 Workflow GitHub Actions:
 
-* ⏰ działa co 3 dni oraz ręcznie (`workflow_dispatch`)  
+* ⏰ działa codziennie o 03:00 UTC (cron) oraz ręcznie (`workflow_dispatch`)  
 * pobiera listy źródłowe  
 * normalizuje domeny w jednolity format  
-* łączy i deduplikuje listy  
-* sprawdza, czy lista nie przekracza limitu (~370k domen)  
-* commit i push do repozytorium — gotowe do użycia w OpenWrt
+* tworzy profile `basic.txt`, `full.txt`, `combined.txt`  
+* deduplikuje domeny  
+* sprawdza limit (~370k domen)  
+* commit i push do repozytorium — gotowe do użycia w OpenWrt  
+* generuje badge `.badges/domains.json` i `.badges/full_domains.json`
 
 ---
 
@@ -58,25 +66,21 @@ Workflow GitHub Actions:
 
 1. Skopiuj URL do wybranej listy, np.:
 https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/combined.txt
+https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/full.txt
+https://raw.githubusercontent.com/przemekp1/openwrt-adblock-hosts/main/domains/basic.txt
 
-2. W OpenWrt w konfiguracji Adblock dodaj ten URL jako **feed** w formacie `<DOMAIN>`
-
-3. Zrestartuj usługę Adblock lub wymuś aktualizację listy
-
-4. Blokowanie domen działa od razu
+3. W OpenWrt w konfiguracji Adblock dodaj URL jako **feed** w formacie `<DOMAIN>`  
+4. Zrestartuj usługę Adblock lub wymuś aktualizację listy  
+5. Blokowanie działa od razu
 
 ---
 
 ## ⚠️ Uwagi
 
-* Listy są agregatem z różnych źródeł — może zdarzyć się fałszywy alarm  
-* Projekt ma charakter **użyteczny i informacyjny** — nie gwarantuje 100% ochrony  
+* Listy są agregatem z różnych źródeł — mogą wystąpić fałszywe alarmy  
+* Projekt ma charakter **informacyjny i ochronny** — nie gwarantuje 100% ochrony  
 * Jeśli zauważysz problematyczne domeny lub błędy — zgłoś issue w repozytorium
 
 ---
 
 ⭐ Jeśli repozytorium jest dla Ciebie pomocne, zostaw **gwiazdkę** — to wspiera rozwój projektu!
-
----
-
-

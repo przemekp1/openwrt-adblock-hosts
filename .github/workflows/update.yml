@@ -1,0 +1,37 @@
+name: Update domain blocklists
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # codziennie o 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+
+      - name: Build lists
+        run: |
+          chmod +x scripts/*.sh
+          ./scripts/build.sh
+
+      - name: Commit & push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git status --porcelain | grep .; then
+            git add domains/
+            git commit -m "update blocklists ($(date -u +%Y-%m-%d))"
+            git push
+          else
+            echo "No changes to commit"
+          fi

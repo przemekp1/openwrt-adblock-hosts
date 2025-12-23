@@ -2,11 +2,11 @@ name: Update domain blocklists
 
 on:
   schedule:
-    - cron: "0 3 */3 * *"   # co 3 dni
+    - cron: "0 3 * * *"   # codziennie o 03:00 UTC
   workflow_dispatch:
 
 permissions:
-  contents: write   # konieczne, żeby workflow mógł pushować zmiany
+  contents: write   # konieczne do push
 
 jobs:
   update:
@@ -33,9 +33,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           if git status --porcelain | grep .; then
-            git add domains/
+            git add domains/ .badges/
             git commit -m "update blocklists ($(date -u +%Y-%m-%d))"
             git push
           else
             echo "No changes to commit"
-         fi
+          fi

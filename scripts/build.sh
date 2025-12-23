@@ -1,6 +1,22 @@
 #!/bin/sh
 set -e
 
+fetch() {
+  NAME="$1"
+  URL="$2"
+  OUT="$3"
+
+  echo "[+] Fetching $NAME"
+  if ! curl -fsSL "$URL" > "$OUT.tmp"; then
+    echo "[!] WARNING: failed to fetch $NAME"
+    : > "$OUT"
+  else
+    cat "$OUT.tmp" | "$ROOT/scripts/normalize.sh" > "$OUT"
+  fi
+
+  rm -f "$OUT.tmp"
+}
+
 ROOT="$(pwd)"
 TMP="$ROOT/tmp"
 DOMAINS="$ROOT/domains"
